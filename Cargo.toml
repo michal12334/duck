@@ -1,0 +1,16 @@
+[package]
+name = "duck"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egui = "0.23"
+egui-winit = "0.23"
+egui_glium = "0.23"
+glium = "0.33"
+glutin = "0.31.3"
+glutin-winit = "0.4.2"
+nalgebra = "0.32.5"
+winit = "0.28"
