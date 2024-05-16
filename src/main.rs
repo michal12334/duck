@@ -1,6 +1,9 @@
+mod meshes;
+
 use glium::Surface;
 use winit::{event, event_loop};
 use winit::event::WindowEvent;
+use crate::meshes::read_mesh::read_mesh;
 
 fn main() {
     let mut width = 800;
@@ -13,6 +16,8 @@ fn main() {
         .build(&event_loop);
 
     let mut egui_glium = egui_glium::EguiGlium::new(&display, &window, &event_loop);
+    
+    let duck_mesh = read_mesh("meshes/duck.txt", &display);
 
     event_loop.run(move |event, _window_target, control_flow| {
         let mut redraw = || {
