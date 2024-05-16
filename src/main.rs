@@ -1,8 +1,11 @@
 mod meshes;
 
+use egui::Shape::Mesh;
 use glium::Surface;
+use nalgebra::Matrix4;
 use winit::{event, event_loop};
 use winit::event::WindowEvent;
+use crate::meshes::mesh_drawer::MeshDrawer;
 use crate::meshes::read_mesh::read_mesh;
 
 fn main() {
@@ -18,6 +21,15 @@ fn main() {
     let mut egui_glium = egui_glium::EguiGlium::new(&display, &window, &event_loop);
     
     let duck_mesh = read_mesh("meshes/duck.txt", &display);
+    let mesh_drawer = MeshDrawer::new(&display);
+    
+    let model = Matrix4::new_translation(&nalgebra::Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
+    let perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
+    let view = Matrix4::look_at_rh(
+        &nalgebra::Point3::new(0.0, 0.0, 5.0),
+        &nalgebra::Point3::new(0.0, 0.0, 0.0),
+        &nalgebra::Vector3::y(),
+    );
 
     event_loop.run(move |event, _window_target, control_flow| {
         let mut redraw = || {
@@ -37,6 +49,8 @@ fn main() {
             let mut target = display.draw();
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
+            
+            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model);
             
             egui_glium.paint(&display, &mut target);
 

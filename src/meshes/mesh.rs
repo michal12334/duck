@@ -6,8 +6,8 @@ use crate::meshes::vertex::Vertex;
 pub struct Mesh {
     vertices: Vec<Vertex>,
     indices: Vec<u32>,
-    vertex_buffer: VertexBuffer<Vertex>,
-    index_buffer: IndexBuffer<u32>,
+    pub vertex_buffer: VertexBuffer<Vertex>,
+    pub index_buffer: IndexBuffer<u32>,
 }
 
 impl Mesh {
