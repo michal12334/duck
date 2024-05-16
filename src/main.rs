@@ -25,7 +25,7 @@ fn main() {
 
     let image = image::load(std::io::Cursor::new(&include_bytes!("../textures/ducktex.jpg")), image::ImageFormat::Jpeg).unwrap().to_rgba8();
     let image_dimensions = image.dimensions();
-    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let image = glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
     let texture = glium::texture::Texture2d::new(&display, image).unwrap();
     
     let model = Matrix4::new_translation(&nalgebra::Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
