@@ -22,6 +22,11 @@ fn main() {
     
     let duck_mesh = read_mesh("meshes/duck.txt", &display);
     let mesh_drawer = MeshDrawer::new(&display);
+
+    let image = image::load(std::io::Cursor::new(&include_bytes!("../textures/ducktex.jpg")), image::ImageFormat::Jpeg).unwrap().to_rgba8();
+    let image_dimensions = image.dimensions();
+    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = glium::texture::Texture2d::new(&display, image).unwrap();
     
     let model = Matrix4::new_translation(&nalgebra::Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
     let perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
@@ -50,7 +55,7 @@ fn main() {
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
             
-            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model);
+            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &texture);
             
             egui_glium.paint(&display, &mut target);
 

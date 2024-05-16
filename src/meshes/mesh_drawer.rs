@@ -1,4 +1,4 @@
-use glium::{Display, DrawParameters, Frame, Program, Surface, uniform};
+use glium::{Display, DrawParameters, Frame, Program, Surface, Texture2d, uniform};
 use glium::glutin::surface::WindowSurface;
 use nalgebra::Matrix4;
 use crate::meshes::mesh::Mesh;
@@ -14,12 +14,15 @@ impl MeshDrawer {
             #version 140
     
             in vec3 position;
+            in vec2 tex_coords;
+            out vec2 v_tex_coords;
             
             uniform mat4 perspective;
             uniform mat4 model;
             uniform mat4 view;
     
             void main() {
+                v_tex_coords = tex_coords;
                 gl_Position = perspective * view * model * vec4(position, 1.0);
             }
         "#;
@@ -27,10 +30,13 @@ impl MeshDrawer {
         let fragment_shader_src = r#"
             #version 140
     
+            in vec2 v_tex_coords;
             out vec4 color;
             
+            uniform sampler2D tex;
+            
             void main() {
-                color = vec4(1.0, 0.0, 0.0, 1.0);
+                color = texture(tex, v_tex_coords);
             }
         "#;
 
@@ -56,6 +62,7 @@ impl MeshDrawer {
         perspective: &Matrix4<f32>,
         view: &Matrix4<f32>,
         model: &Matrix4<f32>,
+        texture: &Texture2d,
     ) {
         
         target
@@ -67,6 +74,7 @@ impl MeshDrawer {
                     perspective: perspective.data.0,
                     model: model.data.0,
                     view: view.data.0,
+                    tex: texture,
                 },
                 &self.drawing_parameters,
             )
