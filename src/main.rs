@@ -2,7 +2,7 @@ mod meshes;
 
 use egui::Shape::Mesh;
 use glium::Surface;
-use nalgebra::Matrix4;
+use nalgebra::{Matrix4, Point3, Vector3};
 use winit::{event, event_loop};
 use winit::event::WindowEvent;
 use crate::meshes::mesh_drawer::MeshDrawer;
@@ -28,12 +28,12 @@ fn main() {
     let image = glium::texture::RawImage2d::from_raw_rgba(image.into_raw(), image_dimensions);
     let texture = glium::texture::Texture2d::new(&display, image).unwrap();
     
-    let model = Matrix4::new_translation(&nalgebra::Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
-    let perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
+    let model = Matrix4::new_translation(&Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
+    let mut perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
     let view = Matrix4::look_at_rh(
-        &nalgebra::Point3::new(0.0, 0.0, 5.0),
-        &nalgebra::Point3::new(0.0, 0.0, 0.0),
-        &nalgebra::Vector3::y(),
+        &Point3::new(0.0, 0.0, 5.0),
+        &Point3::new(0.0, 0.0, 0.0),
+        &Vector3::y(),
     );
 
     event_loop.run(move |event, _window_target, control_flow| {
@@ -74,6 +74,7 @@ fn main() {
                         display.resize((*new_size).into());
                         width = new_size.width;
                         height = new_size.height;
+                        perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
                     }
                     _ => {}
                 }
