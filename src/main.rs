@@ -7,9 +7,10 @@ use egui::Shape::Mesh;
 use glium::{Display, Surface};
 use glium::glutin::surface::WindowSurface;
 use image::io::Reader;
-use nalgebra::{Matrix4, Point3, Vector3};
+use nalgebra::{Matrix4, Point3, Vector3, Vector4};
 use winit::{event, event_loop};
-use winit::event::WindowEvent;
+use winit::event::{MouseButton, WindowEvent};
+use winit::event::ElementState::Pressed;
 use crate::cubes::cube::Cube;
 use crate::cubes::cube_drawer::CubeDrawer;
 use crate::meshes::mesh_drawer::MeshDrawer;
@@ -37,14 +38,21 @@ fn main() {
     
     let model = Matrix4::new_translation(&Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
     let mut perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
-    let view = Matrix4::look_at_rh(
-        &Point3::new(0.0, 0.0, 5.0),
-        &Point3::new(0.0, 0.0, 0.0),
-        &Vector3::y(),
-    );
     
     let cube = Cube::new(&display);
     let cube_drawer = CubeDrawer::new(&display);
+
+    let mut mouse_position = (0.0, 0.0);
+    let mut camera_direction = Vector3::new(0.0f32, 0.0, 1.0);
+    let mut camera_angle = Vector3::new(0.0f32, 0.0, 0.0);
+    let mut camera_up = Vector3::new(0.0f32, 1.0, 0.0);
+    let mut camera_distant = 4.0f32;
+    let mut view = Matrix4::look_at_rh(
+        &Point3::from_slice((-camera_distant * camera_direction).as_slice()),
+        &Point3::new(0.0, 0.0, 0.0),
+        &camera_up,
+    );
+    let mut mouse_middle_button_pressed = false;
 
     event_loop.run(move |event, _window_target, control_flow| {
         let mut redraw = || {
@@ -86,6 +94,39 @@ fn main() {
                         width = new_size.width;
                         height = new_size.height;
                         perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
+                    }
+                    WindowEvent::CursorMoved { position, .. } => {
+                        let delta = (position.x - mouse_position.0, position.y - mouse_position.1);
+                        mouse_position = (position.x, position.y);
+                        if mouse_middle_button_pressed {
+                            camera_angle.x += delta.1 as f32 * 0.01;
+                            camera_angle.y += delta.0 as f32 * 0.01 * if camera_angle.x.cos() < 0.0 { -1.0 } else { 1.0 };
+                            camera_direction = (Matrix4::from_euler_angles(camera_angle.x, camera_angle.y, 0.0) * Vector4::new(0.0, 0.0, 1.0, 0.0)).xyz();
+                            camera_up = (Matrix4::from_euler_angles(camera_angle.x, camera_angle.y, 0.0) * Vector4::new(0.0, 1.0, 0.0, 0.0)).xyz();
+                            view = Matrix4::look_at_rh(
+                                &Point3::from_slice((-camera_distant * camera_direction).as_slice()),
+                                &Point3::new(0.0, 0.0, 0.0),
+                                &camera_up,
+                            );
+                        }
+                    }
+                    WindowEvent::MouseInput { state, button, .. } => {
+                        if *button == MouseButton::Middle {
+                            mouse_middle_button_pressed = *state == Pressed;
+                        }
+                    }
+                    WindowEvent::MouseWheel { delta, .. } => {
+                        match delta {
+                            event::MouseScrollDelta::LineDelta(_x, y) => {
+                                camera_distant += -y * 0.1;
+                                view = Matrix4::look_at_rh(
+                                    &Point3::from_slice((-camera_distant * camera_direction).as_slice()),
+                                    &Point3::new(0.0, 0.0, 0.0),
+                                    &camera_up,
+                                );
+                            }
+                            _ => {}
+                        }
                     }
                     _ => {}
                 }
