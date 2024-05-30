@@ -67,11 +67,11 @@ impl WaterDrawer {
                 if (ax > ay && ax > az) {
                     if (r.x > 0) {
                         float tx = r.z / 2.0 + 0.5;
-                        float ty = r.y / 2.0 + 0.5;
+                        float ty = -r.y / 2.0 + 0.5;
                         return texture(tex1, vec2(tx, ty));
                     } else {
                         float tx = r.z / 2.0 + 0.5;
-                        float ty = r.y / 2.0 + 0.5;
+                        float ty = -r.y / 2.0 + 0.5;
                         return texture(tex1, vec2(tx, ty));
                     }
                 } else if (ay > ax && ay > az) {
@@ -87,11 +87,11 @@ impl WaterDrawer {
                 } else {
                     if (r.z > 0) {
                         float tx = r.x / 2.0 + 0.5;
-                        float ty = r.y / 2.0 + 0.5;
+                        float ty = -r.y / 2.0 + 0.5;
                         return texture(tex1, vec2(tx, ty));
                     } else {
                         float tx = r.x / 2.0 + 0.5;
-                        float ty = r.y / 2.0 + 0.5;
+                        float ty = -r.y / 2.0 + 0.5;
                         return texture(tex1, vec2(tx, ty));
                     }
                 }
@@ -116,13 +116,11 @@ impl WaterDrawer {
                 vec4 reflected_color = get_color(local_position, reflected);
                 vec4 refracted_color = get_color(local_position, refracted);
                 
-                if (any(isnan(refracted))) {
+                if (!all(isnan(refracted))) {
                     color = mix(refracted_color, reflected_color, fresnel_value);
                 } else {
                     color = reflected_color;
                 }
-                
-                color = mix(refracted_color, reflected_color, fresnel_value);
             }
         "#;
 
