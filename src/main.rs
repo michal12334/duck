@@ -4,6 +4,7 @@ mod water;
 
 use std::fs::File;
 use std::io::BufReader;
+use egui::{ScrollArea, Slider, Widget};
 use egui::Shape::Mesh;
 use glium::{Display, Surface};
 use glium::glutin::surface::WindowSurface;
@@ -47,6 +48,7 @@ fn main() {
     
     let water = Water::new(&display);
     let water_drawer = WaterDrawer::new(&display);
+    let mut water_height = 0f32;
 
     let mut mouse_position = (0.0, 0.0);
     let mut camera_direction = Vector3::new(0.0f32, 0.0, 1.0);
@@ -62,7 +64,14 @@ fn main() {
 
     event_loop.run(move |event, _window_target, control_flow| {
         let mut redraw = || {
-            let repaint_after = egui_glium.run(&window, |egui_ctx| {});
+            let repaint_after = egui_glium.run(&window, |egui_ctx| {
+                egui::Window::new("panel").show(egui_ctx, |ui| {
+                    Slider::new(&mut water_height, -0.9..=0.9)
+                        .step_by(0.05)
+                        .text("water height")
+                        .ui(ui);
+                });
+            });
 
             *control_flow = if repaint_after.is_zero() {
                 window.request_redraw();
@@ -81,7 +90,7 @@ fn main() {
             
             mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
-            water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), &vulkan_texture, &sky_texture, &sand_texture);
+            water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture);
             
             egui_glium.paint(&display, &mut target);
 

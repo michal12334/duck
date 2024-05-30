@@ -21,9 +21,11 @@ impl WaterDrawer {
             uniform mat4 perspective;
             uniform mat4 view;
             uniform mat4 model;
+            uniform float height;
     
             void main() {
                 local_position = position;
+                local_position.y = height;
                 vec4 world_position4 = model * vec4(local_position, 1.0);
                 world_position = world_position4.xyz;
                 gl_Position = perspective * view * world_position4;
@@ -148,6 +150,7 @@ impl WaterDrawer {
         view: &Matrix4<f32>,
         model: &Matrix4<f32>,
         camera_position: &Point3<f32>,
+        water_height: f32,
         texture1: &Texture2d,
         texture2: &Texture2d,
         texture3: &Texture2d,
@@ -162,6 +165,7 @@ impl WaterDrawer {
                     view: view.data.0,
                     model: model.data.0,
                     camera_position: [camera_position.x, camera_position.y, camera_position.z],
+                    height: water_height,
                     tex1: texture1,
                     tex2: texture2,
                     tex3: texture3,
