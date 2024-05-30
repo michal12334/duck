@@ -1,5 +1,6 @@
 mod meshes;
 mod cubes;
+mod water;
 
 use std::fs::File;
 use std::io::BufReader;
@@ -15,6 +16,8 @@ use crate::cubes::cube::Cube;
 use crate::cubes::cube_drawer::CubeDrawer;
 use crate::meshes::mesh_drawer::MeshDrawer;
 use crate::meshes::read_mesh::read_mesh;
+use crate::water::water::Water;
+use crate::water::water_drawer::WaterDrawer;
 
 fn main() {
     let mut width = 800;
@@ -41,6 +44,9 @@ fn main() {
     
     let cube = Cube::new(&display);
     let cube_drawer = CubeDrawer::new(&display);
+    
+    let water = Water::new(&display);
+    let water_drawer = WaterDrawer::new(&display);
 
     let mut mouse_position = (0.0, 0.0);
     let mut camera_direction = Vector3::new(0.0f32, 0.0, 1.0);
@@ -75,6 +81,7 @@ fn main() {
             
             mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
+            water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
             
             egui_glium.paint(&display, &mut target);
 
