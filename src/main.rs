@@ -10,6 +10,8 @@ use glium::{Display, Surface};
 use glium::glutin::surface::WindowSurface;
 use image::io::Reader;
 use nalgebra::{Matrix4, Point3, Vector3, Vector4};
+use rand::prelude::ThreadRng;
+use rand::{RngCore, thread_rng};
 use winit::{event, event_loop};
 use winit::event::{MouseButton, WindowEvent};
 use winit::event::ElementState::Pressed;
@@ -51,6 +53,8 @@ fn main() {
     let water_drawer = WaterDrawer::new(&display);
     let mut water_height = 0f32;
     let water_normal_computer = WaterNormalComputer::new(&display);
+    
+    let mut rng = thread_rng();
 
     let mut mouse_position = (0.0, 0.0);
     let mut camera_direction = Vector3::new(0.0f32, 0.0, 1.0);
@@ -85,17 +89,27 @@ fn main() {
             } else {
                 event_loop::ControlFlow::Wait
             };
+            *control_flow = event_loop::ControlFlow::Poll;
 
             let mut target = display.draw();
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
+
+            {
+                let x = rng.next_u32() % 2048;
+                let y = rng.next_u32() % 2048;
+
+                if x < 256 && y < 256 { 
+                    water_normal_computer.bend(x as i32, y as i32);
+                } 
+            }
             
             water_normal_computer.compute();
             
             mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
             water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture, &water_normal_computer.normal_tex);
-            
+
             egui_glium.paint(&display, &mut target);
 
             target.finish().unwrap();
@@ -158,6 +172,9 @@ fn main() {
                 }
             }
             event::Event::NewEvents(event::StartCause::ResumeTimeReached { .. }) => {
+                window.request_redraw();
+            }
+            event::Event::MainEventsCleared => {
                 window.request_redraw();
             }
             _ => (),

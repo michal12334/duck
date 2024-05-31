@@ -110,7 +110,7 @@ impl WaterDrawer {
                 
                 bool below = dot(view_vector, normal) < 0;
                 if (below) {
-                    normal = -normal;
+                    normal.y = -normal.y;
                     n1n2 = 1.0 / n1n2;
                 }
 

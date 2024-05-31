@@ -7,6 +7,7 @@ pub struct WaterNormalComputer {
     height_compute_shader: ComputeShader,
     swap_compute_shader: ComputeShader,
     normal_compute_shader: ComputeShader,
+    bend_compute_shader: ComputeShader,
     tex1: Texture2d,
     tex2: Texture2d,
     pub normal_tex: Texture2d,
@@ -106,10 +107,25 @@ impl WaterNormalComputer {
                 ivec2 iy2 = ivec2(i.x, max(i.y - 1, 0));
                 float y1 = imageLoad(tex1, ix1).x - imageLoad(tex1, ix2).x;
                 float y2 = imageLoad(tex1, iy1).x - imageLoad(tex1, iy2).x;
-                vec3 v1 = vec3(2.0, y1, 0.0);
-                vec3 v2 = vec3(0.0, y2, 2.0);
+                vec3 v1 = vec3(2.0 / 256.0, y1, 0.0);
+                vec3 v2 = vec3(0.0, y2, 2.0 / 256.0);
                 vec3 n = normalize(cross(v2.xyz, v1.xyz));
                 imageStore(normal_tex, i, vec4(n, 0.0));
+            }
+            "#)
+            .unwrap();
+
+        let bend_compute_shader = ComputeShader::from_source(display, r#"\
+            #version 460 core
+            layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+            layout(r32f) writeonly uniform image2D tex1;
+            uniform int x;
+            uniform int y;
+
+            void main() {
+                ivec2 i = ivec2(x, y);
+                imageStore(tex1, i, vec4(-0.25, 0, 0, 0));
             }
             "#)
             .unwrap();
@@ -125,6 +141,7 @@ impl WaterNormalComputer {
             height_compute_shader,
             swap_compute_shader,
             normal_compute_shader,
+            bend_compute_shader,
             tex1,
             tex2,
             normal_tex,
@@ -197,6 +214,25 @@ impl WaterNormalComputer {
                 },
                 32,
                 64,
+                1);
+    }
+    
+    pub fn bend(&self, x: i32, y: i32) {
+        let tex1_unit = self
+            .tex1
+            .image_unit(ImageUnitFormat::R32F)
+            .unwrap()
+            .set_access(ImageUnitAccess::Write);
+        
+        self.bend_compute_shader
+            .execute(
+                uniform! {
+                    tex1: tex1_unit,
+                    x: x,
+                    y: y,
+                },
+                1,
+                1,
                 1);
     }
 }

@@ -587,6 +587,7 @@ dependencies = [
  "glutin-winit 0.4.2",
  "image",
  "nalgebra",
+ "rand",
  "winit 0.28.7",
 ]
 
