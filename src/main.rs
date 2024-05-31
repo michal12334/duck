@@ -4,6 +4,7 @@ mod water;
 
 use std::fs::File;
 use std::io::BufReader;
+use chrono::Local;
 use egui::{ScrollArea, Slider, Widget};
 use egui::Shape::Mesh;
 use glium::{Display, Surface};
@@ -67,28 +68,27 @@ fn main() {
         &camera_up,
     );
     let mut mouse_middle_button_pressed = false;
+    
+    let mut previous_time = Local::now();
 
     event_loop.run(move |event, _window_target, control_flow| {
         let mut redraw = || {
-            let repaint_after = egui_glium.run(&window, |egui_ctx| {
+            let current_time = Local::now();
+            let duration = current_time - previous_time;
+            let fps = 1000000.0 / duration.num_microseconds().unwrap_or(1) as f64;
+            previous_time = current_time;
+            
+            egui_glium.run(&window, |egui_ctx| {
                 egui::Window::new("panel").show(egui_ctx, |ui| {
                     Slider::new(&mut water_height, -0.9..=0.9)
                         .step_by(0.05)
                         .text("water height")
                         .ui(ui);
+                    
+                    ui.label(format!("FPS: {:.1}", fps));
                 });
             });
-
-            *control_flow = if repaint_after.is_zero() {
-                window.request_redraw();
-                event_loop::ControlFlow::Poll
-            } else if let Some(repaint_after_instant) =
-                std::time::Instant::now().checked_add(repaint_after)
-            {
-                event_loop::ControlFlow::WaitUntil(repaint_after_instant)
-            } else {
-                event_loop::ControlFlow::Wait
-            };
+            
             *control_flow = event_loop::ControlFlow::Poll;
 
             let mut target = display.draw();
