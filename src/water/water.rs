@@ -13,10 +13,10 @@ pub struct Water {
 impl Water {
     pub fn new(display: &glium::Display<WindowSurface>) -> Self {
         let vertices = vec![
-            Vertex::new([-1.0, 0.0, -1.0]),
-            Vertex::new([ 1.0, 0.0, -1.0]),
-            Vertex::new([-1.0, 0.0,  1.0]),
-            Vertex::new([ 1.0, 0.0,  1.0]),
+            Vertex::new([-1.0, 0.0, -1.0], [0.0, 0.0]),
+            Vertex::new([ 1.0, 0.0, -1.0], [1.0, 0.0]),
+            Vertex::new([-1.0, 0.0,  1.0], [0.0, 1.0]),
+            Vertex::new([ 1.0, 0.0,  1.0], [1.0, 1.0]),
         ];
 
         let indices = vec![

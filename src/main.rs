@@ -19,6 +19,7 @@ use crate::meshes::mesh_drawer::MeshDrawer;
 use crate::meshes::read_mesh::read_mesh;
 use crate::water::water::Water;
 use crate::water::water_drawer::WaterDrawer;
+use crate::water::water_normal_computer::WaterNormalComputer;
 
 fn main() {
     let mut width = 800;
@@ -49,6 +50,7 @@ fn main() {
     let water = Water::new(&display);
     let water_drawer = WaterDrawer::new(&display);
     let mut water_height = 0f32;
+    let water_normal_computer = WaterNormalComputer::new(&display);
 
     let mut mouse_position = (0.0, 0.0);
     let mut camera_direction = Vector3::new(0.0f32, 0.0, 1.0);
@@ -88,9 +90,11 @@ fn main() {
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
             
+            water_normal_computer.compute();
+            
             mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
-            water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture);
+            water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture, &water_normal_computer.normal_tex);
             
             egui_glium.paint(&display, &mut target);
 

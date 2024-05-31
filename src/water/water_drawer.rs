@@ -14,9 +14,11 @@ impl WaterDrawer {
             #version 460 core
     
             in vec3 position;
+            in vec2 tex_coords;
             
             out vec3 local_position;
             out vec3 world_position;
+            out vec2 v_tex_coords;
             
             uniform mat4 perspective;
             uniform mat4 view;
@@ -24,6 +26,7 @@ impl WaterDrawer {
             uniform float height;
     
             void main() {
+                v_tex_coords = tex_coords;
                 local_position = position;
                 local_position.y = height;
                 vec4 world_position4 = model * vec4(local_position, 1.0);
@@ -37,6 +40,7 @@ impl WaterDrawer {
             
             in vec3 local_position;
             in vec3 world_position;
+            in vec2 v_tex_coords;
             
             out vec4 color;
 
@@ -44,6 +48,7 @@ impl WaterDrawer {
             uniform sampler2D tex2;
             uniform sampler2D tex3;
             uniform vec3 camera_position;
+            uniform sampler2D normal_tex;
             
             vec3 intersect_ray(vec3 p, vec3 v) {
                 vec3 t_m = (vec3(-1, -1, -1) - p) / v;
@@ -100,7 +105,7 @@ impl WaterDrawer {
             
             void main() {
                 vec3 view_vector = normalize(camera_position - world_position);
-                vec3 normal = vec3(0, 1, 0);
+                vec3 normal = normalize(texture(normal_tex, v_tex_coords).xyz);
                 float n1n2 = 3.0/4.0;
                 
                 bool below = dot(view_vector, normal) < 0;
@@ -152,6 +157,7 @@ impl WaterDrawer {
         texture1: &Texture2d,
         texture2: &Texture2d,
         texture3: &Texture2d,
+        normal_tex: &Texture2d,
     ) {
         target
             .draw(
@@ -167,6 +173,7 @@ impl WaterDrawer {
                     tex1: texture1,
                     tex2: texture2,
                     tex3: texture3,
+                    normal_tex: normal_tex,
                 },
                 &self.drawing_parameters,
             )
