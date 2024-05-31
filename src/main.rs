@@ -54,6 +54,7 @@ fn main() {
     let water_drawer = WaterDrawer::new(&display);
     let mut water_height = 0f32;
     let water_normal_computer = WaterNormalComputer::new(&display);
+    let mut time_to_compute = 0.0f32;
     
     let mut rng = thread_rng();
 
@@ -75,7 +76,8 @@ fn main() {
         let mut redraw = || {
             let current_time = Local::now();
             let duration = current_time - previous_time;
-            let fps = 1000000.0 / duration.num_microseconds().unwrap_or(1) as f64;
+            let duration_in_seconds = duration.num_microseconds().unwrap_or(1) as f64 / 1_000_000.0;
+            let fps = 1.0 / duration_in_seconds;
             previous_time = current_time;
             
             egui_glium.run(&window, |egui_ctx| {
@@ -95,16 +97,20 @@ fn main() {
 
             target.clear_color_and_depth((0.0, 0.0, 0.0, 1.0), 1.0);
 
+            time_to_compute += duration_in_seconds as f32;
+            if time_to_compute >= water_normal_computer.get_dt()
             {
-                let x = rng.next_u32() % 2048;
-                let y = rng.next_u32() % 2048;
+                let x = rng.next_u32() % 256 * 12;
+                let y = rng.next_u32() % 256 * 12;
 
                 if x < 256 && y < 256 { 
                     water_normal_computer.bend(x as i32, y as i32);
-                } 
+                }
+
+                water_normal_computer.compute();
+                
+                time_to_compute -= water_normal_computer.get_dt();
             }
-            
-            water_normal_computer.compute();
             
             mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);

@@ -13,6 +13,7 @@ pub struct WaterNormalComputer {
     pub normal_tex: Texture2d,
     a: f32,
     b: f32,
+    dt: f32,
 }
 
 impl WaterNormalComputer {
@@ -147,6 +148,7 @@ impl WaterNormalComputer {
             normal_tex,
             a,
             b,
+            dt,
         }
     }
     
@@ -234,5 +236,9 @@ impl WaterNormalComputer {
                 1,
                 1,
                 1);
+    }
+    
+    pub fn get_dt(&self) -> f32 {
+        self.dt
     }
 }
