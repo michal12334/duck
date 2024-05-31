@@ -44,7 +44,6 @@ fn main() {
     let sky_texture = read_sky_texture(&display);
     let sand_texture = read_sand_texture(&display);
     
-    let model = Matrix4::new_translation(&Vector3::new(0.0, -1.0, 0.0)) * Matrix4::new_scaling(0.01);
     let mut perspective = Matrix4::new_perspective(width as f32 / height as f32, std::f32::consts::PI / 2.0, 0.1, 100.0);
     
     let cube = Cube::new(&display);
@@ -112,7 +111,7 @@ fn main() {
                 time_to_compute -= water_normal_computer.get_dt();
             }
             
-            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &model, &duck_texture);
+            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &(Matrix4::new_translation(&Vector3::new(0.0, -0.2 + water_height * 5.0, 0.0)) * Matrix4::new_scaling(0.01)), &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
             water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture, &water_normal_computer.normal_tex);
 
