@@ -2,15 +2,17 @@ mod meshes;
 mod cubes;
 mod water;
 
+use std::f32::consts::PI;
 use std::fs::File;
 use std::io::BufReader;
+use std::vec;
 use chrono::Local;
 use egui::{ScrollArea, Slider, Widget};
 use egui::Shape::Mesh;
 use glium::{Display, Surface};
 use glium::glutin::surface::WindowSurface;
 use image::io::Reader;
-use nalgebra::{clamp, Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
+use nalgebra::{clamp, Matrix4, Point2, Point3, Rotation3, Unit, Vector2, Vector3, Vector4};
 use rand::prelude::ThreadRng;
 use rand::{Rng, RngCore, thread_rng};
 use winit::{event, event_loop};
@@ -136,7 +138,7 @@ fn main() {
                 time_to_compute -= water_normal_computer.get_dt();
             }
             
-            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &(Matrix4::new_translation(&Vector3::new(duck_position.x, -0.2 + water_height * 5.0, duck_position.y)) * Matrix4::new_scaling(0.01)), &duck_texture);
+            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &(Matrix4::new_translation(&Vector3::new(duck_position.x, -0.2 + water_height * 5.0, duck_position.y)) * get_rotation(get_b_spline_derivative_value(b_spline, b_spline_t)) * Matrix4::new_scaling(0.01)), &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
             water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture, &water_normal_computer.normal_tex);
 
@@ -262,4 +264,22 @@ fn get_b_spline_value(b_spline: [Point2<f32>; 4], t: f32) -> Point2<f32> {
     Point2::new(
         b_spline[0].x * b0 + b_spline[1].x * b1 + b_spline[2].x * b2 + b_spline[3].x * b3,
         b_spline[0].y * b0 + b_spline[1].y * b1 + b_spline[2].y * b2 + b_spline[3].y * b3)
+}
+
+fn get_b_spline_derivative_value(b_spline: [Point2<f32>; 4], t: f32) -> Vector2<f32> {
+    const EPS: f32 = 0.0001;
+    let t1 = t - EPS;
+    let t2 = t + EPS;
+    let p1 = get_b_spline_value(b_spline, t1);
+    let p2 = get_b_spline_value(b_spline, t2);
+    (p2.coords - p1.coords) / (2.0 * EPS)
+}
+
+fn get_rotation(direction: Vector2<f32>) -> Matrix4<f32> {
+    let angle = direction.y.atan2(-direction.x);
+    Matrix4::new(
+        angle.cos(), 0.0, angle.sin(), 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -angle.sin(), 0.0, angle.cos(), 0.0,
+        0.0, 0.0, 0.0, 1.0)
 }
