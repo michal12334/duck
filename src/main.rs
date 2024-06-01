@@ -253,7 +253,7 @@ fn get_b_spline(p0: Point2<f32>, rng: &mut ThreadRng) -> [Point2<f32>; 4] {
 
 fn get_random_point(p0: Point2<f32>, rng: &mut ThreadRng) -> Point2<f32> {
     let direction = Vector2::new(rng.gen_range(-100..100) as f32, rng.gen_range(-100..100) as f32).normalize();
-    Point2::new(clamp(p0.x + direction.x, -5.0, 5.0), clamp(p0.y + direction.y, -5.0, 5.0))
+    Point2::new(clamp(p0.x + direction.x * 3.0, -3.0, 3.0), clamp(p0.y + direction.y * 3.0, -3.0, 3.0))
 }
 
 fn get_b_spline_value(b_spline: [Point2<f32>; 4], t: f32) -> Point2<f32> {
