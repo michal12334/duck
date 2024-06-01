@@ -92,7 +92,7 @@ fn main() {
                         .text("water height")
                         .ui(ui);
 
-                    Slider::new(&mut duck_speed, -0.001..=0.1)
+                    Slider::new(&mut duck_speed, 0.000..=0.1)
                         .step_by(0.001)
                         .text("Duck speed")
                         .ui(ui);
