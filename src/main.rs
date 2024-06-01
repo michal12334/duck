@@ -276,10 +276,12 @@ fn get_b_spline_derivative_value(b_spline: [Point2<f32>; 4], t: f32) -> Vector2<
 }
 
 fn get_rotation(direction: Vector2<f32>) -> Matrix4<f32> {
-    let angle = direction.y.atan2(-direction.x);
+    let c = (direction.x * direction.x + direction.y * direction.y).sqrt();
+    let cos = -direction.x / c;
+    let sin = direction.y / c;
     Matrix4::new(
-        angle.cos(), 0.0, angle.sin(), 0.0,
+        cos, 0.0, sin, 0.0,
         0.0, 1.0, 0.0, 0.0,
-        -angle.sin(), 0.0, angle.cos(), 0.0,
+        -sin, 0.0, cos, 0.0,
         0.0, 0.0, 0.0, 1.0)
 }
