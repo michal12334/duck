@@ -7,7 +7,7 @@ use nalgebra::{clamp, Matrix4, Point2, Point3, Vector2, Vector3, Vector4};
 use rand::prelude::ThreadRng;
 use rand::{thread_rng, Rng, RngCore};
 use winit::event::ElementState::Pressed;
-use winit::event::{MouseButton, WindowEvent};
+use winit::event::MouseButton;
 use winit::{event, event_loop};
 
 use crate::cubes::cube::Cube;
@@ -23,8 +23,8 @@ mod meshes;
 mod water;
 
 fn main() {
-    let mut width = 800;
-    let mut height = 600;
+    let width = 800;
+    let height = 600;
 
     let event_loop = winit::event_loop::EventLoopBuilder::new().build();
     let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
@@ -214,10 +214,8 @@ fn main() {
                     }
                     WindowEvent::Resized(new_size) => {
                         display.resize((*new_size).into());
-                        width = new_size.width;
-                        height = new_size.height;
                         perspective = Matrix4::new_perspective(
-                            width as f32 / height as f32,
+                            new_size.width as f32 / new_size.height as f32,
                             std::f32::consts::PI / 2.0,
                             0.1,
                             100.0,
