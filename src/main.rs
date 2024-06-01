@@ -140,7 +140,7 @@ fn main() {
                 time_to_compute -= water_normal_computer.get_dt();
             }
             
-            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &(Matrix4::new_translation(&Vector3::new(duck_position.x, -0.2 + water_height * 5.0, duck_position.y)) * get_rotation(get_b_spline_derivative_value(b_spline, b_spline_t)) * Matrix4::new_scaling(0.01)), &duck_texture);
+            mesh_drawer.draw(&mut target, &duck_mesh, &perspective, &view, &(Matrix4::new_translation(&Vector3::new(duck_position.x, -0.1 + water_height * 5.0, duck_position.y)) * get_rotation(get_b_spline_derivative_value(b_spline, b_spline_t)) * Matrix4::new_scaling(0.005)), &duck_texture);
             cube_drawer.draw(&mut target, &cube, &perspective, &view, &Matrix4::new_scaling(5.0), &vulkan_texture, &sky_texture, &sand_texture);
             water_drawer.draw(&mut target, &water, &perspective, &view, &Matrix4::new_scaling(5.0), &Point3::from_slice((-camera_distant * camera_direction).as_slice()), water_height, &vulkan_texture, &sky_texture, &sand_texture, &water_normal_computer.normal_tex);
 
