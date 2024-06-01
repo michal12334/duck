@@ -1,7 +1,7 @@
-use glium::{Display, Texture2d, uniform};
 use glium::glutin::surface::WindowSurface;
 use glium::program::ComputeShader;
 use glium::uniforms::{ImageUnitAccess, ImageUnitFormat};
+use glium::{uniform, Display, Texture2d};
 
 pub struct WaterNormalComputer {
     height_compute_shader: ComputeShader,
@@ -20,11 +20,12 @@ impl WaterNormalComputer {
     pub fn new(display: &Display<WindowSurface>) -> Self {
         let tex1 = Texture2d::empty_with_format(
             display,
-                glium::texture::UncompressedFloatFormat::F32,
+            glium::texture::UncompressedFloatFormat::F32,
             glium::texture::MipmapsOption::NoMipmap,
             256,
             256,
-        ).unwrap();
+        )
+        .unwrap();
 
         let tex2 = Texture2d::empty_with_format(
             display,
@@ -32,7 +33,8 @@ impl WaterNormalComputer {
             glium::texture::MipmapsOption::NoMipmap,
             256,
             256,
-        ).unwrap();
+        )
+        .unwrap();
 
         let normal_tex = Texture2d::empty_with_format(
             display,
@@ -40,9 +42,12 @@ impl WaterNormalComputer {
             glium::texture::MipmapsOption::NoMipmap,
             256,
             256,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let height_compute_shader = ComputeShader::from_source(display, r#"\
+        let height_compute_shader = ComputeShader::from_source(
+            display,
+            r#"\
             #version 460 core
             layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 
@@ -73,10 +78,13 @@ impl WaterNormalComputer {
                 float c = d * (A * (z1 + z2 + z3 + z4) + B * z5 - z6);
                 imageStore(tex2, i, vec4(c, 0, 0, 0));
             }
-            "#)
-            .unwrap();
+            "#,
+        )
+        .unwrap();
 
-        let swap_compute_shader = ComputeShader::from_source(display, r#"\
+        let swap_compute_shader = ComputeShader::from_source(
+            display,
+            r#"\
             #version 460 core
             layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 
@@ -90,10 +98,13 @@ impl WaterNormalComputer {
                 imageStore(tex1, i, c2);
                 imageStore(tex2, i, c1);
             }
-            "#)
-            .unwrap();
-        
-        let normal_compute_shader = ComputeShader::from_source(display, r#"\
+            "#,
+        )
+        .unwrap();
+
+        let normal_compute_shader = ComputeShader::from_source(
+            display,
+            r#"\
             #version 460 core
             layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 
@@ -113,10 +124,13 @@ impl WaterNormalComputer {
                 vec3 n = normalize(cross(v2.xyz, v1.xyz));
                 imageStore(normal_tex, i, vec4(n, 0.0));
             }
-            "#)
-            .unwrap();
+            "#,
+        )
+        .unwrap();
 
-        let bend_compute_shader = ComputeShader::from_source(display, r#"\
+        let bend_compute_shader = ComputeShader::from_source(
+            display,
+            r#"\
             #version 460 core
             layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -128,9 +142,10 @@ impl WaterNormalComputer {
                 ivec2 i = ivec2(x, y);
                 imageStore(tex1, i, vec4(-0.25, 0, 0, 0));
             }
-            "#)
-            .unwrap();
-        
+            "#,
+        )
+        .unwrap();
+
         let n = 256f32;
         let h = 2.0 / (n - 1.0);
         let c = 1f32;
@@ -151,7 +166,7 @@ impl WaterNormalComputer {
             dt,
         }
     }
-    
+
     pub fn compute(&self) {
         let tex1_unit = self
             .tex1
@@ -163,18 +178,18 @@ impl WaterNormalComputer {
             .image_unit(ImageUnitFormat::R32F)
             .unwrap()
             .set_access(ImageUnitAccess::ReadWrite);
-        
-        self.height_compute_shader
-            .execute(
-                uniform! {
-                    tex1: tex1_unit,
-                    tex2: tex2_unit,
-                    A: self.a,
-                    B: self.b,
-                },
+
+        self.height_compute_shader.execute(
+            uniform! {
+                tex1: tex1_unit,
+                tex2: tex2_unit,
+                A: self.a,
+                B: self.b,
+            },
             32,
             64,
-            1);
+            1,
+        );
 
         let tex1_unit = self
             .tex1
@@ -187,16 +202,16 @@ impl WaterNormalComputer {
             .unwrap()
             .set_access(ImageUnitAccess::ReadWrite);
 
-        self.swap_compute_shader
-            .execute(
-                uniform! {
-                    tex1: tex1_unit,
-                    tex2: tex2_unit,
-                },
-                32,
-                64,
-                1);
-        
+        self.swap_compute_shader.execute(
+            uniform! {
+                tex1: tex1_unit,
+                tex2: tex2_unit,
+            },
+            32,
+            64,
+            1,
+        );
+
         let tex1_unit = self
             .tex1
             .image_unit(ImageUnitFormat::R32F)
@@ -207,37 +222,37 @@ impl WaterNormalComputer {
             .image_unit(ImageUnitFormat::RGBA8)
             .unwrap()
             .set_access(ImageUnitAccess::Write);
-        
-        self.normal_compute_shader
-            .execute(
-                uniform! {
-                    tex1: tex1_unit,
-                    normal_tex: normal_unit,
-                },
-                32,
-                64,
-                1);
+
+        self.normal_compute_shader.execute(
+            uniform! {
+                tex1: tex1_unit,
+                normal_tex: normal_unit,
+            },
+            32,
+            64,
+            1,
+        );
     }
-    
+
     pub fn bend(&self, x: i32, y: i32) {
         let tex1_unit = self
             .tex1
             .image_unit(ImageUnitFormat::R32F)
             .unwrap()
             .set_access(ImageUnitAccess::Write);
-        
-        self.bend_compute_shader
-            .execute(
-                uniform! {
-                    tex1: tex1_unit,
-                    x: x,
-                    y: y,
-                },
-                1,
-                1,
-                1);
+
+        self.bend_compute_shader.execute(
+            uniform! {
+                tex1: tex1_unit,
+                x: x,
+                y: y,
+            },
+            1,
+            1,
+            1,
+        );
     }
-    
+
     pub fn get_dt(&self) -> f32 {
         self.dt
     }

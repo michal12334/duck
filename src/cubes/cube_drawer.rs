@@ -1,6 +1,7 @@
-use glium::{Display, DrawParameters, Frame, Program, Surface, Texture2d, uniform};
 use glium::glutin::surface::WindowSurface;
+use glium::{uniform, Display, DrawParameters, Frame, Program, Surface, Texture2d};
 use nalgebra::Matrix4;
+
 use crate::cubes::cube::Cube;
 
 pub struct CubeDrawer {
@@ -52,7 +53,8 @@ impl CubeDrawer {
             }
         "#;
 
-        let program = Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
+        let program =
+            Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
         let mut drawing_parameters = DrawParameters::default();
         drawing_parameters.depth = glium::Depth {
@@ -60,7 +62,8 @@ impl CubeDrawer {
             write: true,
             ..Default::default()
         };
-        drawing_parameters.backface_culling = glium::draw_parameters::BackfaceCullingMode::CullClockwise;
+        drawing_parameters.backface_culling =
+            glium::draw_parameters::BackfaceCullingMode::CullClockwise;
 
         Self {
             program,

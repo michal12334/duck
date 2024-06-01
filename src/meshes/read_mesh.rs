@@ -1,6 +1,8 @@
 use std::fs;
-use glium::Display;
+
 use glium::glutin::surface::WindowSurface;
+use glium::Display;
+
 use crate::meshes::mesh::Mesh;
 use crate::meshes::vertex::Vertex;
 
@@ -28,7 +30,7 @@ pub fn read_mesh(file_name: &str, display: &Display<WindowSurface>) -> Mesh {
         ];
         vertices.push(Vertex::new(position, normal, tex_coords));
     }
-    
+
     let triangles_count = lines.next().unwrap().parse::<usize>().unwrap();
     let mut indices = Vec::with_capacity(triangles_count * 3);
     for _ in 0..triangles_count {

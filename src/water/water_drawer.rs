@@ -1,6 +1,7 @@
-use glium::{Display, DrawParameters, Frame, Program, Surface, Texture2d, uniform};
 use glium::glutin::surface::WindowSurface;
-use nalgebra::{Matrix4, Point3, Vector3};
+use glium::{uniform, Display, DrawParameters, Frame, Program, Surface, Texture2d};
+use nalgebra::{Matrix4, Point3};
+
 use crate::water::water::Water;
 
 pub struct WaterDrawer {
@@ -129,7 +130,8 @@ impl WaterDrawer {
             }
         "#;
 
-        let program = Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
+        let program =
+            Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
         let mut drawing_parameters = DrawParameters::default();
         drawing_parameters.depth = glium::Depth {
@@ -137,7 +139,8 @@ impl WaterDrawer {
             write: true,
             ..Default::default()
         };
-        drawing_parameters.backface_culling = glium::draw_parameters::BackfaceCullingMode::CullingDisabled;
+        drawing_parameters.backface_culling =
+            glium::draw_parameters::BackfaceCullingMode::CullingDisabled;
 
         Self {
             program,

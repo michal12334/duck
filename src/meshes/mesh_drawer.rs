@@ -1,6 +1,7 @@
-use glium::{Display, DrawParameters, Frame, Program, Surface, Texture2d, uniform};
 use glium::glutin::surface::WindowSurface;
+use glium::{uniform, Display, DrawParameters, Frame, Program, Surface, Texture2d};
 use nalgebra::Matrix4;
+
 use crate::meshes::mesh::Mesh;
 
 pub struct MeshDrawer {
@@ -40,7 +41,8 @@ impl MeshDrawer {
             }
         "#;
 
-        let program = Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
+        let program =
+            Program::from_source(display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
         let mut drawing_parameters = DrawParameters::default();
         drawing_parameters.depth = glium::Depth {
@@ -48,7 +50,8 @@ impl MeshDrawer {
             write: true,
             ..Default::default()
         };
-        drawing_parameters.backface_culling = glium::draw_parameters::BackfaceCullingMode::CullClockwise;
+        drawing_parameters.backface_culling =
+            glium::draw_parameters::BackfaceCullingMode::CullClockwise;
 
         Self {
             program,
@@ -65,7 +68,6 @@ impl MeshDrawer {
         model: &Matrix4<f32>,
         texture: &Texture2d,
     ) {
-        
         target
             .draw(
                 &mesh.vertex_buffer,
