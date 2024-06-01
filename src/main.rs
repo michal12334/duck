@@ -133,6 +133,8 @@ fn main() {
                 }
                 duck_position = get_b_spline_value(b_spline, b_spline_t);
 
+                water_normal_computer.bend((duck_position.x * 128.0 / 5.0 + 128.0) as i32, (duck_position.y * 128.0 / 5.0 + 128.0) as i32);
+
                 water_normal_computer.compute();
                 
                 time_to_compute -= water_normal_computer.get_dt();
